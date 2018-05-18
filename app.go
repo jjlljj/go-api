@@ -1,0 +1,2 @@
+tyoe App struct {
+}
