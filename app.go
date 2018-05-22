@@ -14,7 +14,6 @@ type App struct {
   DB *sql.DB
 }
 
-// initialize => create db connection && routes
 func (a *App) Initialize(user, password, dbname string) { 
   connectionString := fmt.Sprintf("user=%s password=%s dbname=%s", user, password, dbname)
 
@@ -28,5 +27,4 @@ func (a *App) Initialize(user, password, dbname string) {
   a.Router = mux.NewRouter()
 }
 
-// start application
 func (a *App) Run(addr string) { }
