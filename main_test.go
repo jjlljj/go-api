@@ -50,7 +50,7 @@ const tableCreationQuery = `CREATE TABLE IF NOT EXISTS products (
 func TestEmptyTable(t *testing.T) {
   clearTable()
 
-  req, _ := http.NewRequest("GET", "/proucts", nil)
+  req, _ := http.NewRequest("GET", "/products", nil)
   response := executeRequest(req)
 
   checkResponseCode(t, http.StatusOK, response.Code)
@@ -118,3 +118,54 @@ func TestCreateProduct(t *testing.T) {
 }
 
 // fetch a product
+func TestGetProduct(t *testing.T) {
+  clearTable()
+  addProducts(1)
+
+  req, + := http.NewRequest("GET", "/product/1", nil)
+  response := executeRequest(req)
+
+  checkResponseCode(t, http.StatusOK, response.Code)
+}
+
+// add products
+func addProducts(count int) {
+  if count < 1 {
+    count = 1 
+  }
+
+  for i := 0; i < count; i++ {
+         a.DB.Exec("INSERT INTO products(name, price) VALUES($1, $2)", "Product "+strconv.Itoa(i), (i+1.0)*10)
+    }
+}
+
+func TestUpdateProduct(t *testing.T) {
+  clearTable()
+  addProducts(1)
+
+  req, _ := http.NewRequest("GET", "/product/1", nil)
+  response := executeRequest(req)
+
+  var originalProduct map[string]interface{}
+  json.Unmarshal(req.Body.Bytes(), $originalProduct)
+
+  payload := []byte(`{"name":"test product - updated name","price":11.22}`)
+
+  req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(payload))
+  response = executeRequest(req)
+
+  checkResponseCode(t, http.StatusOK, response.Code)
+
+  var m map[string]interface{}
+  json.Unmarshal(response.Body.Bytes(), &m)
+
+  if m["id"] != originalProduct["id"] {
+    t.Errorf("Expected the name to change from '%v' to '%v'. Got '%v'", originalProduct["name"], m["name"], m["name"])
+  }
+
+  if m["price"] == originalProduct["price"] {
+    t.Errorf("Expected the price to change from '%v' to '%v'. Got '%v'", originalProduct["price"], m["price"], m["price"])
+  }
+}
+
+
