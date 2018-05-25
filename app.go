@@ -25,6 +25,7 @@ func (a *App) Initialize(user, password, dbname string) {
   }
 
   a.Router = mux.NewRouter()
+  a.intializeRoutes()
 }
 
 //////ROUTE HANDLERS
@@ -152,5 +153,9 @@ func (a *App) initializeRoutes() {
   a.Router.HandleFunc("/product/{id:[0-9]", a.updateProduct).Methods("PUT")
   a.Router.HandleFunc("/product/{id:[0-9]", a.deleteProduct).Methods("DELETE")
 
+}
 
-func (a *App) Run(addr string) { }
+
+func (a *App) Run(addr string) { 
+  log.Fatal(http.ListenAndServe(":8000", a.Router))
+}
