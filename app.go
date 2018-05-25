@@ -4,6 +4,9 @@ import (
   "database/sql"
   "fmt"
   "log"
+  "encoding/json"
+  "net/http"
+  "strconv"
 
   "github.com/gorilla/mux"
    _ "github.com/lib/pq"
@@ -25,7 +28,7 @@ func (a *App) Initialize(user, password, dbname string) {
   }
 
   a.Router = mux.NewRouter()
-  a.intializeRoutes()
+  a.initializeRoutes()
 }
 
 //////ROUTE HANDLERS
@@ -34,7 +37,7 @@ func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   id, err := strconv.Atoi(vars["id"])
   if err != nil {
-    respondWithError(w, http.StatusBadRequest), "Invalid product ID")
+    respondWithError(w, http.StatusBadRequest, "Invalid product ID")
     return
   }
 
@@ -44,7 +47,7 @@ func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
     case sql.ErrNoRows:
       respondWithError(w, http.StatusNotFound, "Product not found")
     default:
-      respondWithError(w, http.StatusInternalServiceError, err.Error())
+      respondWithError(w, http.StatusInternalServerError, err.Error())
     }
     return
   }
@@ -52,12 +55,12 @@ func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
   respondWithJSON(w, http.StatusOK, p)
 }
 
-func respondWithError(w, http.ResponseWriter, code int, message string) {
+func respondWithError(w http.ResponseWriter, code int, message string) {
   respondWithJSON(w, code, map[string]string{"error": message})
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{
-  respondWithJSON, _ := json.Marshal(payload)
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+  response, _ := json.Marshal(payload)
 
   w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(code)
@@ -65,7 +68,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
-  count, _ :+ strconv.Atoi(r.FormValue("count"))
+  count, _ := strconv.Atoi(r.FormValue("count"))
   start, _ := strconv.Atoi(r.FormValue("start"))
 
   if count > 10 || count < 1 {
@@ -77,11 +80,11 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
 
   products, err := getProducts(a.DB, start, count)
   if err != nil {
-    respondWithError(w. http.StatusInternalServiceError, err.Error())
+    respondWithError(w, http.StatusInternalServerError, err.Error())
     return
   }
 
-  respondWithJSON(w. http.StatusOK, products)
+  respondWithJSON(w, http.StatusOK, products)
 }
 
 func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +97,7 @@ func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
   defer r.Body.Close()
 
   if err := p.createProduct(a.DB); err != nil {
-    respondWithError(w, http.StatusInternalServiceError, err.Error())
+    respondWithError(w, http.StatusInternalServerError, err.Error())
     return
   }
 

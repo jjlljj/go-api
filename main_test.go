@@ -2,10 +2,13 @@ package main_test
 
 import (
   "os"
+  "bytes"
   "testing"
   "log"
   "net/http/httptest"
   "net/http"
+  "encoding/json"
+  "strconv"
 
   "."
 )
@@ -96,7 +99,7 @@ func TestCreateProduct(t *testing.T) {
 
   payload := []byte(`{"name":"test product","price":11.22}`)
 
-  req, _ := http.NewRequest("POST", "/product", byes.NewBuffer(payload))
+  req, _ := http.NewRequest("POST", "/product", bytes.NewBuffer(payload))
   response := executeRequest(req)
 
   checkResponseCode(t, http.StatusCreated, response.Code)
@@ -122,7 +125,7 @@ func TestGetProduct(t *testing.T) {
   clearTable()
   addProducts(1)
 
-  req, + := http.NewRequest("GET", "/product/1", nil)
+  req, _ := http.NewRequest("GET", "/product/1", nil)
   response := executeRequest(req)
 
   checkResponseCode(t, http.StatusOK, response.Code)
@@ -147,7 +150,7 @@ func TestUpdateProduct(t *testing.T) {
   response := executeRequest(req)
 
   var originalProduct map[string]interface{}
-  json.Unmarshal(req.Body.Bytes(), $originalProduct)
+  json.Unmarshal(response.Body.Bytes(), &originalProduct)
 
   payload := []byte(`{"name":"test product - updated name","price":11.22}`)
 
@@ -167,20 +170,20 @@ func TestUpdateProduct(t *testing.T) {
     t.Errorf("Expected the price to change from '%v' to '%v'. Got '%v'", originalProduct["price"], m["price"], m["price"])
   }
 }
-
 func TestDeleteProduct(t *testing.T) {
-  clearTable()
-  addProducts(1)
+    clearTable()
+    addProducts(1)
 
-  req, _ := http.NewRequest("GET", "/product/1", nil)
-  response := executeRequest(req)
-  checkResponseCode(t, http.StatusOK, response.Code)
+    req, _ := http.NewRequest("GET", "/product/1", nil)
+    response := executeRequest(req)
+    checkResponseCode(t, http.StatusOK, response.Code)
 
-  req, _ := http.NewRequest("DELETE", "/product/1", nil)
-  response := executeRequest(req)
-  checkResponseCode(t, http.StatusOK, response.Code)
+    req, _ = http.NewRequest("DELETE", "/product/1", nil)
+    response = executeRequest(req)
 
-  req, _ := http.NewRequest("GET", "/product/1", nil)
-  response := executeRequest(req)
-  checkResponseCode(t, http.StatusNotFound, response.Code)
+    checkResponseCode(t, http.StatusOK, response.Code)
+
+    req, _ = http.NewRequest("GET", "/product/1", nil)
+    response = executeRequest(req)
+    checkResponseCode(t, http.StatusNotFound, response.Code)
 }
